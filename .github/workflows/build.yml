@@ -11,50 +11,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
-
-      - name: Setup Android SDK (install specific platform/build-tools)
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 33
-          components: |
-            build-tools;33.0.2
-            platform-tools
-            platforms;android-33
-
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-
-      - name: Accept Android SDK licenses (robust)
-        run: |
-          set -e
-          if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-            SDKMAN="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          elif [ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]; then
-            SDKMAN="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
-          else
-            echo "sdkmanager not found; skipping license acceptance"
-            exit 0
-          fi
-          yes | "$SDKMAN" --licenses || true
+          java-version: 11
 
       - name: Make gradlew executable
         run: chmod +x gradlew
-
-      - name: Cache Gradle wrapper and dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            .gradle
-          key: gradle-cache-${{ runner.os }}-v1-${{ hashFiles('**/*.gradle*','**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-cache-${{ runner.os }}-v1-
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
